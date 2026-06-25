@@ -8,11 +8,12 @@ function generateInviteCode(): string {
 
 export const authService = {
   async signUp(email: string, password: string, displayName: string): Promise<UserModel> {
-    const { data, error } = await supabase.auth.signUpWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
+    if (!data.user) throw new Error('Signup failed')
 
     const user: UserModel = {
-      id: data.user!.id,
+      id: data.user.id,
       email,
       displayName,
       inviteCode: generateInviteCode(),
@@ -28,11 +29,12 @@ export const authService = {
   async signIn(email: string, password: string): Promise<UserModel> {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
+    if (!data.user) throw new Error('Login failed')
 
     const { data: userData, error: fetchError } = await supabase
       .from('users')
       .select()
-      .eq('id', data.user!.id)
+      .eq('id', data.user.id)
       .single()
 
     if (fetchError) throw fetchError
