@@ -47,12 +47,14 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<UserModel | null> {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
-    const { data, error } = await supabase.from('users').select().eq('id', user.id).single()
+    const { data, error } = await supabase
+      .from('users')
+      .select()
+      .eq('id', user.id)
+      .single()
 
     if (error) return null
     return data as UserModel
@@ -63,9 +65,7 @@ export const authService = {
     if (displayName) updates.displayName = displayName
     if (photoUrl) updates.photoUrl = photoUrl
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('Not authenticated')
 
     const { error } = await supabase.from('users').update(updates).eq('id', user.id)
